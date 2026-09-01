@@ -107,8 +107,14 @@ def format_all_examples(examples):
     training_strings = [format_instruction_example(example) for example in examples]
     return training_strings
 
-# Step 12 - build_text_dataset (not yet solved)
-# TODO: implement
+# Step 12 - build_text_dataset
+import datasets
+def build_text_dataset(texts):
+    """Wrap a list of training strings in a HF Dataset with a 'text' column."""
+    
+    return datasets.Dataset.from_dict({
+    "text": texts
+})
 
 # Step 13 - tokenize_text (not yet solved)
 # TODO: implement
