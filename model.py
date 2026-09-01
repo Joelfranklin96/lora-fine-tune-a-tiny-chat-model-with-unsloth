@@ -72,8 +72,27 @@ def trainable_fraction(trainable_count, total_count):
     
     return float(trainable_count/total_count)
 
-# Step 9 - build_instruction_examples (not yet solved)
-# TODO: implement
+# Step 9 - build_instruction_examples
+def build_instruction_examples():
+    """Return a small list of {'instruction', 'response'} dicts for SFT."""
+    return [
+        {
+            "instruction": "When do new hires get their laptop?",
+            "response": "Your laptop is handed out during day-one orientation.",
+        },
+        {
+            "instruction": "Who should I contact if I have a payroll question?",
+            "response": "Reach out to the HR helpdesk for anything payroll related.",
+        },
+        {
+            "instruction": "How long is the onboarding program?",
+            "response": "Onboarding runs for the first two weeks after you join.",
+        },
+        {
+            "instruction": "Where can I find the employee handbook?",
+            "response": "The employee handbook is available on the company intranet.",
+        },
+    ]
 
 # Step 10 - format_instruction_example (not yet solved)
 # TODO: implement
