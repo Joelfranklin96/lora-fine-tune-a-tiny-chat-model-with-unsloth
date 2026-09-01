@@ -94,8 +94,11 @@ def build_instruction_examples():
         },
     ]
 
-# Step 10 - format_instruction_example (not yet solved)
-# TODO: implement
+# Step 10 - format_instruction_example
+def format_instruction_example(example):
+    """Return a single training string with role markers for instruction and response."""
+    
+    return "### Instruction:\n{}\n\n### Response:\n{}".format(example['instruction'], example['response'])
 
 # Step 11 - format_all_examples (not yet solved)
 # TODO: implement
