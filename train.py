@@ -1,16 +1,11 @@
-"""
-LoRA Fine-Tune a Tiny Chat Model with Unsloth scaffold.
+"""End-to-end QLoRA SFT run: load, adapt, train, and generate.
 
-Run this with: python scaffold.py
-Uses functions defined in model.py.
+Run with: python train.py
 """
 
-from model import *  # noqa: F401, F403 (pulls in your solution functions)
-
-"""Scaffold: LoRA fine-tune a tiny 4-bit Qwen2.5 chat model with Unsloth."""
 import torch
 
-from solution import (
+from model import (
     load_base_model_and_tokenizer,
     count_total_parameters,
     is_model_4bit_quantized,
@@ -25,7 +20,7 @@ from solution import (
     build_text_dataset,
     tokenize_text,
     count_tokens,
-    build_training_arguments,
+    build_sft_config,
     build_sft_trainer,
     run_sft_training,
     switch_to_inference_mode,
@@ -37,7 +32,7 @@ from solution import (
 def main():
     torch.manual_seed(0)
 
-    # 1) Load 4-bit base model + tokenizer.
+    # Load the 4-bit base model and tokenizer.
     model, tokenizer = load_base_model_and_tokenizer(
         model_name="unsloth/Qwen2.5-0.5B-Instruct-bnb-4bit",
         max_seq_length=256,
@@ -46,21 +41,19 @@ def main():
     quantized = is_model_4bit_quantized(model)
     print(f"[base] total_params={total_params:,} 4bit={quantized}")
 
-    # 2) Make sure tokenizer has a pad token.
+    # Make sure the tokenizer has a pad token.
     tokenizer = ensure_pad_token(tokenizer)
     print(f"[tokenizer] pad_token={tokenizer.pad_token!r}")
 
-    # 3) Attach LoRA adapters to attention projections.
+    # Attach LoRA adapters to the attention projections.
     target_modules = get_lora_target_modules()
     print(f"[lora] target_modules={target_modules}")
-    model = attach_lora_adapters(
-        model, r=8, lora_alpha=16, target_modules=target_modules
-    )
+    model = attach_lora_adapters(model, r=8, lora_alpha=16, target_modules=target_modules)
     trainable = count_trainable_parameters(model)
     frac = trainable_fraction(trainable, total_params)
     print(f"[lora] trainable={trainable:,} fraction={frac:.6f}")
 
-    # 4) Build a tiny in-code instruction dataset.
+    # Build the instruction dataset.
     examples = build_instruction_examples()
     print(f"[data] num_examples={len(examples)}")
     first_text = format_instruction_example(examples[0])
@@ -69,26 +62,25 @@ def main():
     dataset = build_text_dataset(texts)
     print(f"[data] dataset_columns={dataset.column_names} size={len(dataset)}")
 
-    # 5) Peek at tokenization of one example.
+    # Sanity-check tokenization of one example.
     ids = tokenize_text(tokenizer, texts[0])
     print(f"[data] tokens[0]={count_tokens(ids)}")
 
-    # 6) Featherweight SFT: 5 steps, batch size 1.
-    training_args = build_training_arguments(
-        output_dir="./sft_out", max_steps=5, learning_rate=2e-4
+    # Run a short, memory-efficient SFT loop.
+    training_args = build_sft_config(
+        output_dir="./sft_out", max_steps=5, learning_rate=2e-4, max_seq_length=256
     )
-    trainer = build_sft_trainer(
-        model, tokenizer, dataset, training_args, max_seq_length=256
-    )
+    trainer = build_sft_trainer(model, tokenizer, dataset, training_args)
     final_loss = run_sft_training(trainer)
     print(f"[train] final_loss={final_loss:.4f}")
 
-    # 7) Switch to fast inference and generate a reply.
+    # Switch to fast inference and generate a reply.
     switch_to_inference_mode(model)
     prompt = build_chat_prompt(tokenizer, "Say hello in one short sentence.")
     reply = generate_reply(model, tokenizer, prompt, max_new_tokens=32)
     print(f"[gen] reply={reply!r}")
 
+    # Final sanity checks on the run.
     passed = (
         total_params > 0
         and trainable > 0

@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Training outputs
+sft_out/
+
+# Hugging Face / tooling caches
+.cache/
+wandb/
+
+# OS / editor
+.DS_Store
+Thumbs.db
