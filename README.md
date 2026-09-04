@@ -28,8 +28,8 @@ python scaffold.py
 - [x] **16.** build_sft_trainer
 - [x] **17.** run_sft_training
 - [x] **18.** switch_to_inference_mode
-- [ ] **19.** build_chat_prompt
-- [ ] **20.** generate_reply
+- [x] **19.** build_chat_prompt
+- [x] **20.** generate_reply
 
 ---
 

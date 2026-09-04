@@ -177,9 +177,23 @@ def switch_to_inference_mode(model):
     FastLanguageModel.for_inference(model)
     return model
 
-# Step 19 - build_chat_prompt (not yet solved)
-# TODO: implement
+# Step 19 - build_chat_prompt
+def build_chat_prompt(tokenizer, instruction):
+    """Return a chat-template prompt string ready for assistant generation."""
+    
+    return tokenizer.apply_chat_template(
+        [{"role": "user", "content": instruction}],
+        tokenize=False,
+        add_generation_prompt=True,
+    )
 
-# Step 20 - generate_reply (not yet solved)
-# TODO: implement
+# Step 20 - generate_reply
+def generate_reply(model, tokenizer, prompt, max_new_tokens=32):
+    """Greedy-generate a reply for `prompt` and return the decoded text."""
+    # TODO: tokenize prompt, run model.generate with do_sample=False, decode new tokens only
+    input_ids = tokenizer.encode(prompt, return_tensors="pt").to(model.device)
+    with torch.no_grad():
+        output_ids = model.generate(input_ids=input_ids, do_sample=False, max_new_tokens=max_new_tokens)
+    new_token_ids = output_ids[0, input_ids.shape[1]:]
+    return tokenizer.decode(new_token_ids, skip_special_tokens=True)
 
