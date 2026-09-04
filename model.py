@@ -190,7 +190,6 @@ def build_chat_prompt(tokenizer, instruction):
 # Step 20 - generate_reply
 def generate_reply(model, tokenizer, prompt, max_new_tokens=32):
     """Greedy-generate a reply for `prompt` and return the decoded text."""
-    # TODO: tokenize prompt, run model.generate with do_sample=False, decode new tokens only
     input_ids = tokenizer.encode(prompt, return_tensors="pt").to(model.device)
     with torch.no_grad():
         output_ids = model.generate(input_ids=input_ids, do_sample=False, max_new_tokens=max_new_tokens)
